@@ -1,0 +1,33 @@
+{
+  "name": "redbelly-wallet-js",
+  "version": "1.0.3",
+  "description": "A JavaScript library for interacting with Redbelly blockchain",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack"
+  },
+  "keywords": [
+    "redbelly",
+    "blockchain",
+    "wallet",
+    "ethereum"
+  ],
+  "author": "Tri Nguyen",
+  "license": "MIT",
+  "dependencies": {
+    "bip39": "^3.1.0",
+    "ethereumjs-util": "^7.1.5",
+    "hdkey": "^2.1.0",
+    "web3": "^1.9.0"
+  },
+  "devDependencies": {
+    "assert": "^2.1.0",
+    "buffer": "^6.0.3",
+    "crypto-browserify": "^3.12.0",
+    "process": "^0.11.10",
+    "stream-browserify": "^3.0.0",
+    "webpack": "^5.94.0",
+    "webpack-cli": "^5.1.4"
+  }
+}

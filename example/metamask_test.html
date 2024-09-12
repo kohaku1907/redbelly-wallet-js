@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redbelly Wallet Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.5.2/dist/web3.min.js"></script>
+    <script src="../dist/redbelly-wallet.js"></script>
+</head>
+<body>
+    <h1>Redbelly Wallet Test</h1>
+    <div>
+        <h2>Create New Wallet</h2>
+        <button id="createWalletButton">Create Wallet</button>
+        <div id="walletInfo"></div>
+    </div>
+    <div>
+        <h2>MetaMask Integration</h2>
+        <button id="connectButton">Connect MetaMask</button>
+        <button id="addNetworkButton">Add Redbelly Network</button>
+        <button id="sendMetaMaskButton" disabled>Send Transaction (MetaMask)</button>
+        <div id="metaMaskStatus"></div>
+    </div>
+    <div>
+        <h2>Send Transaction (Non-MetaMask)</h2>
+        <input type="text" id="privateKeyInput" placeholder="Private Key">
+        <input type="text" id="toAddressInput" placeholder="To Address">
+        <input type="text" id="amountInput" placeholder="Amount">
+        <button id="sendTransactionButton">Send Transaction</button>
+        <div id="transactionStatus"></div>
+    </div>
+
+    <script>
+        const rpcUrl = 'https://rbn-gcp-australia-southeast1-a-0-b-v2.devnet.redbelly.network:8545';
+        const wallet = new RedbellyWallet(rpcUrl);
+
+        const createWalletButton = document.getElementById('createWalletButton');
+        const walletInfo = document.getElementById('walletInfo');
+        const connectButton = document.getElementById('connectButton');
+        const addNetworkButton = document.getElementById('addNetworkButton');
+        const sendMetaMaskButton = document.getElementById('sendMetaMaskButton');
+        const metaMaskStatus = document.getElementById('metaMaskStatus');
+        const privateKeyInput = document.getElementById('privateKeyInput');
+        const toAddressInput = document.getElementById('toAddressInput');
+        const amountInput = document.getElementById('amountInput');
+        const sendTransactionButton = document.getElementById('sendTransactionButton');
+        const transactionStatus = document.getElementById('transactionStatus');
+
+        createWalletButton.addEventListener('click', async () => {
+            try {
+                const mnemonic = bip39.generateMnemonic();
+                const newWallet = await wallet.createWalletFromMnemonic(mnemonic);
+                walletInfo.innerHTML = `
+                    <p>Address: ${newWallet.address}</p>
+                    <p>Private Key: ${newWallet.privateKey}</p>
+                    <p>Mnemonic: ${newWallet.mnemonic}</p>
+                    <p>Balance: ${newWallet.balance} RBNT</p>
+                `;
+            } catch (error) {
+                walletInfo.textContent = `Error creating wallet: ${error.message}`;
+            }
+        });
+
+        connectButton.addEventListener('click', async () => {
+            try {
+                const address = await wallet.connectMetaMask();
+                metaMaskStatus.textContent = `Connected: ${address}`;
+                sendMetaMaskButton.disabled = false;
+            } catch (error) {
+                metaMaskStatus.textContent = `Error connecting: ${error.message}`;
+            }
+        });
+
+        addNetworkButton.addEventListener('click', async () => {
+            try {
+                await wallet.addRedbellyNetwork();
+                metaMaskStatus.textContent = 'Redbelly Network added to MetaMask';
+            } catch (error) {
+                metaMaskStatus.textContent = `Error adding network: ${error.message}`;
+            }
+        });
+
+        sendMetaMaskButton.addEventListener('click', async () => {
+            try {
+                const toAddress = '0x7Da7B3a2C1d7cDc9f9eC76DEF6cEb1a0A51345D2'; // Replace with a valid address
+                const amount = '0.001'; // Amount in RBNT
+                const receipt = await wallet.sendTransactionWithMetaMask(toAddress, amount);
+                metaMaskStatus.textContent = `Transaction sent: ${receipt}`;
+            } catch (error) {
+                metaMaskStatus.textContent = `Error: ${error.message}`;
+            }
+        });
+
+        sendTransactionButton.addEventListener('click', async () => {
+            const privateKey = privateKeyInput.value;
+            const toAddress = toAddressInput.value;
+            const amount = amountInput.value;
+
+            if (!privateKey || !toAddress || !amount) {
+                transactionStatus.textContent = 'Please fill in all fields';
+                return;
+            }
+
+            try {
+                const receipt = await wallet.sendTransaction(privateKey, toAddress, amount);
+                transactionStatus.textContent = `Transaction sent: ${receipt.transactionHash}`;
+            } catch (error) {
+                transactionStatus.textContent = `Error: ${error.message}`;
+            }
+        });
+    </script>
+</body>
+</html>
