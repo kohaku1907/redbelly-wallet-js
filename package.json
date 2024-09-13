@@ -1,6 +1,6 @@
 {
   "name": "redbelly-wallet-js",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "A JavaScript library for interacting with Redbelly blockchain",
   "main": "index.js",
   "scripts": {
