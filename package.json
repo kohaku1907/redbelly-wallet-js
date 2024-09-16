@@ -1,6 +1,6 @@
 {
   "name": "redbelly-wallet-js",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "A JavaScript library for interacting with Redbelly blockchain",
   "main": "index.js",
   "types": "index.d.ts",
@@ -30,5 +30,9 @@
     "stream-browserify": "^3.0.0",
     "webpack": "^5.94.0",
     "webpack-cli": "^5.1.4"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kohaku1907/redbelly-wallet-js.git"
   }
 }
