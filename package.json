@@ -1,8 +1,9 @@
 {
   "name": "redbelly-wallet-js",
-  "version": "1.0.5",
+  "version": "1.0.8",
   "description": "A JavaScript library for interacting with Redbelly blockchain",
   "main": "index.js",
+  "types": "index.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack"
