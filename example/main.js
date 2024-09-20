@@ -1,8 +1,8 @@
 const RedbellyWallet = require('../src/wallet');
 const bip39 = require('bip39');
 // Replace with your actual Redbelly RPC URL
-const rpcUrl = 'https://rbn-gcp-australia-southeast1-a-0-b-v2.devnet.redbelly.network:8545';
-const wallet = new RedbellyWallet(rpcUrl);
+const network = 'DEVNET'; // or 'TESTNET' or 'MAINNET'
+const wallet = new RedbellyWallet(network);
 
 async function generateMnemonic() {
     try {
@@ -17,28 +17,32 @@ async function generateMnemonic() {
 
 async function main() {
     try {
+        // Get gas price
+        const gasPrice = await wallet.fetchLatestPrice();
+        console.log('Gas price:', gasPrice);
+        
         // Create a new wallet
-        console.log('Creating a new wallet...');
-        const mnemonic = await generateMnemonic();
-        const account = await wallet.createWalletFromMnemonic(mnemonic);
-        console.log('New wallet created:', account);
+        // console.log('Creating a new wallet...');
+        // const mnemonic = await generateMnemonic();
+        // const account = await wallet.createWalletFromMnemonic(mnemonic);
+        // console.log('New wallet created:', account);
 
         // Check balance
-        console.log('Checking balance...');
-        const balance = await wallet.getBalance(account.address);
-        console.log('Wallet balance:', balance, 'RBNT');
+        // console.log('Checking balance...');
+        // const balance = await wallet.getBalance(account.address);
+        // console.log('Wallet balance:', balance, 'RBNT');
 
         // Send a transaction
-        console.log('Sending a transaction...');
-        const toAddress = '0x7Da7B3a2C1d7cDc9f9eC76DEF6cEb1a0A51345D2'; // Replace with a valid address
-        const amount = 0.001; // in RBNT
-        const receipt = await wallet.sendTransaction(account.privateKey, toAddress, amount);
-        console.log('Transaction sent:', receipt.transactionHash);
+        // console.log('Sending a transaction...');
+        // const toAddress = '0x7Da7B3a2C1d7cDc9f9eC76DEF6cEb1a0A51345D2'; // Replace with a valid address
+        // const amount = 0.001; // in RBNT
+        // const receipt = await wallet.sendTransaction(account.privateKey, toAddress, amount);
+        // console.log('Transaction sent:', receipt.transactionHash);
 
         // Check balance again
-        console.log('Checking balance after transaction...');
-        const newBalance = await wallet.getBalance(account.address);
-        console.log('New wallet balance:', newBalance, 'RBNT');
+        // console.log('Checking balance after transaction...');
+        // const newBalance = await wallet.getBalance(account.address);
+        // console.log('New wallet balance:', newBalance, 'RBNT');
 
     } catch (error) {
         console.error('An error occurred:', error);

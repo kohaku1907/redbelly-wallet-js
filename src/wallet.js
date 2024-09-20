@@ -2,11 +2,16 @@ const Web3 = require('web3');
 const bip39 = require('bip39');
 const ethUtil = require('ethereumjs-util');
 const hdkey = require('hdkey');
+const ethers = require('ethers');
+const { priceFeedABI, bootstrapRegistryABI } = require('./abi');
+const CONFIG = require('./config');
 
 class RedbellyWallet {
-  constructor(rpcUrl) {
-    this.rpcUrl = rpcUrl;
-    this.web3 = new Web3(rpcUrl);
+  constructor(network = 'DEVNET') {
+    this.network = network.toUpperCase();
+    this.rpcUrl = CONFIG.RPC_URL[this.network];
+    this.bootstrapRegistryContract = CONFIG.BOOTSTRAP_REGISTRY_CONTRACT[this.network];
+    this.web3 = new Web3(this.rpcUrl);
   }
 
   async createWalletFromMnemonic(mnemonic) {
@@ -78,10 +83,9 @@ class RedbellyWallet {
       const valueInWei = web3.utils.toWei(amount.toString(), 'ether');
       const valueHex = web3.utils.toHex(valueInWei);
 
-      // Get the current gas price
-      const gasPrice = await web3.eth.getGasPrice();
+      const rbntToUsdRate = await this.fetchRBNTtoUSDRate();
+      const gasPrice = web3.utils.toBN(Math.floor(CONFIG.GAS_PRICE_USD / rbntToUsdRate * 1e18)); // Convert to wei
 
-      // Estimate gas for the transaction
       const estimatedGas = await web3.eth.estimateGas({
         from: from,
         to: to,
@@ -111,7 +115,9 @@ class RedbellyWallet {
     const account = this.web3.eth.accounts.privateKeyToAccount(privateKey);
     this.web3.eth.accounts.wallet.add(account);
 
-    const gasPrice = await this.web3.eth.getGasPrice();
+    const rbntToUsdRate = await this.fetchRBNTtoUSDRate();
+    const gasPrice = this.web3.utils.toBN(Math.floor(CONFIG.GAS_PRICE_USD / rbntToUsdRate * 1e18)); // Convert to wei
+
     const nonce = await this.web3.eth.getTransactionCount(account.address);
 
     const tx = {
@@ -137,12 +143,13 @@ class RedbellyWallet {
     return chainId === '0x98'; // Assuming Redbelly's chainId is 152 (0x98 in hex)
   }
 
-  async addRedbellyNetwork() {
+  async addRedbellyNetwork(env = 'DEVNET') {
     if (!(await this.isMetaMaskAvailable())) {
       throw new Error('MetaMask is not installed');
     }
   
     try {
+      if (env === 'DEVNET') {
       await window.ethereum.request({
         method: 'wallet_addEthereumChain',
         params: [{
@@ -157,8 +164,67 @@ class RedbellyWallet {
           blockExplorerUrls: ['https://explorer.devnet.redbelly.network/'] // Replace with actual explorer URL
         }]
       });
+      } else if (env === 'TESTNET') {
+        await window.ethereum.request({
+          method: 'wallet_addEthereumChain',
+          params: [{
+            chainId: '0x98', // 152 in decimal
+            chainName: 'Redbelly Network Testnet',
+            nativeCurrency: {
+              name: 'Redbelly Coin',
+              symbol: 'RBNT', // Replace with actual symbol
+              decimals: 18
+            },
+            rpcUrls: [this.rpcUrl],
+            blockExplorerUrls: ['https://explorer.testnet.redbelly.network/'] // Replace with actual explorer URL
+          }]
+        });
+      } else {
+        throw new Error('Invalid environment');
+      }
     } catch (error) {
       console.error('Failed to add Redbelly network:', error);
+      throw error;
+    }
+  }
+
+  async getGasPriceContractAddress() {
+    const provider = new ethers.JsonRpcProvider(this.rpcUrl);
+    const bootstrapRegistryContract = new ethers.Contract(
+      this.bootstrapRegistryContract,
+      bootstrapRegistryABI,
+      provider
+    );
+    return await bootstrapRegistryContract.getContractAddress("pricefeed");
+  }
+
+  async fetchLatestPrice() {
+    const provider = new ethers.JsonRpcProvider(this.rpcUrl);
+    const priceFeedContractAddr = await this.getGasPriceContractAddress();
+    const priceFeedContract = new ethers.Contract(
+      priceFeedContractAddr,
+      priceFeedABI,
+      provider
+    );
+
+    try {
+      const [price, timestamp] = await priceFeedContract.getLatestPrice();
+      return {
+        price: ethers.formatUnits(price, 6),
+        timestamp: Number(timestamp)
+      };
+    } catch (error) {
+      console.error("Error calling contract function:", error);
+      throw error;
+    }
+  }
+
+  async fetchRBNTtoUSDRate() {
+    try {
+      const latestPrice = await this.fetchLatestPrice();
+      return parseFloat(latestPrice.price);
+    } catch (error) {
+      console.error('Error fetching RBNT to USD rate:', error);
       throw error;
     }
   }

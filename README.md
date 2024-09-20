@@ -12,8 +12,8 @@ npm install redbelly-wallet-js
 
 ```javascript
 const RedbellyWallet = require('redbelly-wallet-js');
-const rpcUrl = 'https://your-redbelly-rpc-url';
-const wallet = new RedbellyWallet(rpcUrl);
+const network = 'DEVNET'; // or 'TESTNET' or 'MAINNET'
+const wallet = new RedbellyWallet(network);
 // Create a new wallet from mnemonic
 const mnemonic = 'your twelve word mnemonic phrase here';
 wallet.createWalletFromMnemonic(mnemonic)

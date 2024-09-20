@@ -31,8 +31,8 @@
     </div>
 
     <script>
-        const rpcUrl = 'https://rbn-gcp-australia-southeast1-a-0-b-v2.devnet.redbelly.network:8545';
-        const wallet = new RedbellyWallet(rpcUrl);
+        const environment = 'DEVNET';
+        const wallet = new RedbellyWallet(environment);
 
         const createWalletButton = document.getElementById('createWalletButton');
         const walletInfo = document.getElementById('walletInfo');
