@@ -2,7 +2,7 @@ const path = require('path');
 const webpack = require('webpack');
 
 module.exports = {
-  entry: './src/wallet.js',
+  entry: ['./src/wallet.js', './src/abi.js', './src/config.js'],
   output: {
     filename: 'redbelly-wallet.js',
     path: path.resolve(__dirname, 'dist'),
