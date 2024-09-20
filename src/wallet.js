@@ -168,7 +168,7 @@ class RedbellyWallet {
         await window.ethereum.request({
           method: 'wallet_addEthereumChain',
           params: [{
-            chainId: '0x98', // 152 in decimal
+            chainId: '0x99', // 153 in decimal
             chainName: 'Redbelly Network Testnet',
             nativeCurrency: {
               name: 'Redbelly Coin',
